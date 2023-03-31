@@ -1,3 +1,10 @@
+"""
+This script estimates mass loss rates for a brown dwarf companion
+in a white dwarf binary based on photospheric pollution. Mass
+loss rates are estimated for Bondi Hoyle and Eddington/gravitational
+formalisms.
+"""
+
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import Distance
