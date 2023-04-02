@@ -1,3 +1,9 @@
+"""
+An interactive script that reads in SDSS spectra and performs
+binary classification into DA/non-DA classes using a pre-trained
+random forest classifier
+"""
+
 from astropy.io import fits
 import os
 import sys
@@ -11,11 +17,23 @@ import time
 from tqdm import tqdm
 
 def fni(array, value):
+    """
+    A simple function that identifies the closest index in a list corresponding to
+    a given value
+
+    Example usage:
+    >>> list1 = [5, 10, 15]
+    >>> fni(list1, 9)
+    Output: 1
+    """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
 
 def list_fits(directory):
+    """
+    Generates a list of .fits spectra in the directory
+    """
     fileList = []
     if directory.endswith('/') == False:
         directory = directory + '/'
@@ -30,6 +48,10 @@ def list_fits(directory):
     return fileList, listLength
 
 def splitter(fileList, listLength):
+    """
+    Splits up the list of .fits spectra into smaller 1000 batches
+    if there are more than 1000 spectra in the directory
+    """
     partitioned = False
     if listLength > 1000:
         partitions = [fileList[x:x+1000] for x in range(0, listLength, 1000)]
@@ -41,6 +63,12 @@ def splitter(fileList, listLength):
     return partitioned, partitions
 
 def preProcess(element):
+    """
+    This function accesses .fits files, retrieves spectral wavelength and flux arrays
+    then crops the spectra to be between 3838.8-8914.6 AA and applies a Gaussian filter
+    to identify any flux outliers in the data that are then replaced by the smoothed
+    Gaussian filter value. The resulting spectrum is then standardised.
+    """
     tempData = []
     hdul = fits.open(element)
     typeEx = hdul[0].data
@@ -62,6 +90,9 @@ def preProcess(element):
     return tempData, dataWave
 
 def plots(name, points):
+    """
+    Displayes plots of misclassified spectra
+    """
     pXMesh = np.linspace(3837.956, 8914.597, 3659)
     plt.title(name)
     plt.plot(pXMesh, points, 'k-', lw=0.2)
@@ -70,6 +101,9 @@ def plots(name, points):
     plt.show()
 
 def sPlots(name, points, direct):
+    """
+    Saves plots of misclassified spectra in a plots directory
+    """
     pXMesh = np.linspace(3837.956, 8914.597, 3659)
     plt.title(name)
     plt.plot(pXMesh, points, 'k-', lw=0.2)
@@ -86,6 +120,9 @@ def sPlots(name, points, direct):
     plt.close()
 
 def qso(element):
+    """
+    Checks if the .fits file contains a spectrum of a QSO
+    """
     hdul = fits.open(element)
     typeEx = hdul[0].header['CLASS']
     isQSO = False
@@ -95,6 +132,9 @@ def qso(element):
     return isQSO
 
 def classify(partitioned, partitions, model, directory, display=False, savePlot=False, saveOut=False):
+    """
+    Main classification method
+    """
     pXMesh = np.linspace(3837.956, 8914.597, 3659)
     globalMisclass = []
     if partitioned: 
