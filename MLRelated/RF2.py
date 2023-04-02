@@ -60,7 +60,7 @@ def prepSpectra(line):
         if i < GaussMin:
             tempData[n] = GaussMin
     tempData = (np.array(tempData) - np.mean(tempData))/np.std(tempData)
-    return tempData
+    return tempData, dataWave
 
 
 # DA Class training sample
@@ -70,7 +70,7 @@ names = []
 with open(path+'DATar') as file:
     for line in file:
         names.append(line)
-        tempData = prepSpectra(line)
+        tempData, dataWave = prepSpectra(line)
         if count == 0:
             minWave = np.min(dataWave)
             maxWave = np.max(dataWave)
@@ -91,7 +91,7 @@ names2 = []
 with open(path+'AAA') as file:
     for line in file:
         names2.append(line)
-        tempData = prepSpectra(line)
+        tempData, dataWave = prepSpectra(line)
         if count == 0:
             dataStackN = tempData
             minWave = np.min(dataWave)
@@ -127,7 +127,7 @@ for k in range(len(jinfiles)):
     with open(pathFile) as file:
         for line in file:
             names2.append(line)
-            tempData = prepSpectra(line)
+            tempData, dataWave = prepSpectra(line)
             if count == 0:
                 dataStackN = tempData
                 minWave = np.min(dataWave)
