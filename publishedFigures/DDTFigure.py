@@ -156,5 +156,5 @@ ax1[0][0].plot([0], [1.5e-18], marker='$5$', c='gray', ms=18)
 ax1[0][0].plot([4], [1.5e-18], marker='$6$', c='gray', ms=18)
 
 
-bboxx = transforms.Bbox([[0.86, 1.5], [19.2, 18]])
+bboxx = transforms.Bbox([[0.86, 1.2], [19.2, 17.7]])
 plt.savefig('DDTFigure.pdf', bbox_inches=bboxx)
