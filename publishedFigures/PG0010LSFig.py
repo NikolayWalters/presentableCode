@@ -1,3 +1,9 @@
+"""
+Multi-band periodogram and individual LS for PG0010+281
+based on ZTF, TESS and WISE photometry. Published in Limits on 
+Substellar Winds using White Dwarf Hosts
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from PyAstronomy import pyasl
@@ -13,6 +19,9 @@ import pandas as pd
 import string
 import matplotlib.ticker as mticker
 
+
+# read in data
+# ztf g, r, i
 data1 = pd.read_csv('pg10ztf/PG10G.csv', delimiter=',')
 data1 = data1[data1["catflags"] < 1]
 timeZTF1 = data1['mjd']
@@ -41,7 +50,7 @@ magsZTFI = fluxZTF1
 dyZTFI = errZTF1
 filtZTFI = np.take(list('I'), np.arange(len(dyZTFI)), mode='wrap')
 
-
+# read in WISE W1, W2
 data1 = pd.read_csv('/home/nwal/Desktop/PG0010/Gaia EDR3 2859951106737135488.csv', delimiter=',')
 timeZTF1 = data1['mjd']
 fluxZTF1 = data1['flux_W1']
@@ -50,7 +59,6 @@ tWISE1 = timeZTF1
 magsWISE1 = fluxZTF1
 dyWISE1 = errZTF1
 filtWISE1 = np.take(list('WISE1'), np.arange(len(dyWISE1)), mode='wrap')
-
 data1 = pd.read_csv('/home/nwal/Desktop/PG0010/Gaia EDR3 2859951106737135488.csv', delimiter=',')
 nan_value = float("NaN") 
 data1.replace("", nan_value, inplace=True)
@@ -63,7 +71,7 @@ magsWISE2 = fluxZTF1
 dyWISE2 = errZTF1
 filtWISE2 = np.take(list('WISE2'), np.arange(len(dyWISE2)), mode='wrap')
 
-
+# download TESS data
 search_result = lk.search_lightcurvefile('WD 0010+280')
 sec3O = search_result[0].download()
 sec3 = sec3O.PDCSAP_FLUX.remove_nans()
@@ -72,7 +80,7 @@ timeTESS = sec3.time
 errTESS = sec3.flux_err
 filtTESS = np.take(list('T'), np.arange(len(timeTESS)), mode='wrap')
 
-
+# run multiband
 timeF = np.concatenate((tZTFG,tZTFR,tZTFI,timeTESS.mjd,tWISE1,tWISE2))
 magsF = np.concatenate((magsZTFG,magsZTFR,magsZTFI,fluxTESS.to_value(),magsWISE1,magsWISE2))
 dyF = np.concatenate((dyZTFG,dyZTFR,dyZTFI,errTESS.to_value(),dyWISE1,dyWISE2))
@@ -83,36 +91,7 @@ LS_multi = periodic.LombScargleMultiband(Nterms_base=1, Nterms_band=0)
 LS_multi.fit(timeF, magsF, dyF, filF)
 P_multi = LS_multi.periodogram(periods)
 
-
-keepSafeTime = timeF
-keepSafeMag = magsF
-keepSafeErr = dyF
-keepSafePower = P_multi
-keepSafeFreq = freq
-
-plt.plot(1/periods, P_multi, lw=1, color='k')
-
-freq = np.linspace(0.001, 25, 10000)
-powerPl = LombScargle(tWISE1,magsWISE1).power(freq)
-print(freq[np.argmax(powerPl)])
-probabilities = [0.1, 0.05, 0.01]
-ls = LombScargle(tWISE1, magsWISE1)
-print('wise1 ', ls.false_alarm_level(probabilities, method='bootstrap')  )
-
-powerWISE1 = powerPl
-freq = np.linspace(0.001, 25, 10000)
-powerPl = LombScargle(tWISE2,magsWISE2).power(freq)
-print(freq[np.argmax(powerPl)])
-ls = LombScargle(tWISE2, magsWISE2)
-print('wise2 ', ls.false_alarm_level(probabilities, method='bootstrap')  )
-
-powerWISE2 = powerPl
-
-freq = np.linspace(0.001, 25, 10000)
-powerTess = LombScargle(timeTESS.mjd,fluxTESS).power(freq)
-ls = LombScargle(timeTESS.mjd,fluxTESS)
-print('TESS ', ls.false_alarm_level(probabilities, method='bootstrap'))
-
+# run individual periodograms
 data1 = pd.read_csv('pg10ztf/PG10G.csv', delimiter=',')
 data1 = data1[data1["catflags"] < 1]
 timeZTF1 = data1['mjd']
@@ -122,11 +101,8 @@ zeroMag = data1['magzp']
 timeZTF1 = timeZTF1
 fluxZTF1 = 3.631*(10**(-fluxZTF1/2.5))
 fluxZTF1 = (fluxZTF1/np.mean(fluxZTF1))-1
-freq = np.linspace(0.001, 25, 10000)
 powerPl = LombScargle(timeZTF1,fluxZTF1).power(freq)
 ls = LombScargle(timeZTF1,fluxZTF1)
-print('ZTFG ', ls.false_alarm_level(probabilities, method='bootstrap'))
-
 powerZTFG = powerPl
 
 data1 = pd.read_csv('pg10ztf/PG10R.csv', delimiter=',')
@@ -138,12 +114,10 @@ zeroMag = data1['magzp']
 timeZTF1 = timeZTF1
 fluxZTF1 = 3.631*(10**(-fluxZTF1/2.5))
 fluxZTF1 = (fluxZTF1/np.mean(fluxZTF1))-1
-freq = np.linspace(0.001, 25, 10000)
 powerPl = LombScargle(timeZTF1,fluxZTF1).power(freq)
 ls = LombScargle(timeZTF1,fluxZTF1)
-print('ZTFr ', ls.false_alarm_level(probabilities, method='bootstrap'))
-
 powerZTFR = powerPl
+
 data1 = pd.read_csv('pg10ztf/PG10I.csv', delimiter=',')
 data1 = data1[data1["catflags"] < 1]
 timeZTF1 = data1['mjd']
@@ -153,23 +127,16 @@ zeroMag = data1['magzp']
 timeZTF1 = timeZTF1
 fluxZTF1 = 3.631*(10**(-fluxZTF1/2.5))
 fluxZTF1 = (fluxZTF1/np.mean(fluxZTF1))-1
-freq = np.linspace(0.001, 25, 10000)
 powerPl = LombScargle(timeZTF1,fluxZTF1).power(freq)
 ls = LombScargle(timeZTF1,fluxZTF1)
-print('ZTFi ', ls.false_alarm_level(probabilities, method='bootstrap'))
-
 powerZTFI = powerPl
 
 
 fig, axs = plt.subplots(7,1,figsize=(12,10))
 # periodogram plot
-
 plt.rcParams["axes.axisbelow"] = False
-
 plt.subplots_adjust(hspace = 0)
-
 axs = axs.flat
-
 plt.rc('xtick',c='k')
 rc('axes', linewidth=2)
 plt.rc('ytick',c='k')
