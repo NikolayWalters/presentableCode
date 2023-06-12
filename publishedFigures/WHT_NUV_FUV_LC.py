@@ -1,34 +1,12 @@
-from astropy.io import fits
-import os
-from sklearn import preprocessing
-import shutil
-from astropy.timeseries import LombScargle
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-from scipy import optimize
-from scipy.interpolate import CubicSpline
-from scipy.integrate import simps
 from lmfit import Parameters, minimize, report_fit, Model,fit_report
-from scipy.interpolate import UnivariateSpline
-from scipy.ndimage import gaussian_filter
-import scipy.signal as signal
-from astropy.time import Time
-import pandas as pd
-from lmfit import Model
-from PyAstronomy.pyasl import foldAt
-from scipy.optimize import curve_fit
-import matplotlib.colors as colors
-import matplotlib.cbook as cbook
-from scipy.ndimage.filters import uniform_filter
 from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
                                AutoMinorLocator)
-import lightkurve as lk
 from pylab import rc
 from matplotlib import gridspec
 from matplotlib import transforms
 from matplotlib import colors
-from scipy.stats import gaussian_kde
 from pylab import *
 rcParams['font.family'] = 'serif'
 rcParams['font.sans-serif'] = ['Times']
@@ -47,45 +25,24 @@ def sineFun(x,amp,phase,off):
     return amp * np.sin(6.283185307*x + phase)+off
 
 indata = np.loadtxt("GD356Uband.dat", usecols=(0,1))
-time = indata[:,0]
-flux = indata[:,1]
-plt.plot(time,flux,'kx')
-timeWHTU = time
-fluxWHTU = flux
+timeWHTU = indata[:,0]
+fluxWHTU = indata[:,1]
 
 indata = np.loadtxt("HSTPhotFUVAnother.dat", usecols=(0,1))
-time = indata[:,0] +2457000
-flux = indata[:,1]
-plt.plot(time,flux,'kx')
-plt.show()
-phasesFold = foldMeth(time,0.08029842621026712)
-sortInd = np.argsort(phasesFold)
-phasesFoldSorted = phasesFold[sortInd]
-FluxSorted = flux[sortInd]
-plt.plot(phasesFoldSorted, FluxSorted, 'kx') #needs 5 points binned
-timeHSTFUV = time
-fluxHSTFUV = flux
+timeHSTFUV = indata[:,0] +2457000
+fluxHSTFUV = indata[:,1]
 
 
 indata = np.loadtxt("HSTPhotNUV.dat", usecols=(0,1))
-time = indata[:,0]
-flux = indata[:,1]
-plt.plot(time,flux,'kx')
-plt.show()
-phasesFold = foldMeth(time,0.08029842621026712)
-sortInd = np.argsort(phasesFold)
-phasesFoldSorted = phasesFold[sortInd]
-FluxSorted = flux[sortInd]
-plt.plot(phasesFoldSorted, FluxSorted, 'kx') #needs 5 points binned as well
-timeHSTNUV = time
-fluxHSTNUV = flux
+timeHSTNUV = indata[:,0]
+fluxHSTNUV = indata[:,1]
 
 
 
 
 
 
-from pylab import rc
+
 rc('axes', linewidth=2)
 fig, axs = plt.subplots(3, 1,
                         gridspec_kw={'hspace': 0., 'wspace': 0}, figsize=(20,30))
@@ -176,6 +133,6 @@ axs[2].xaxis.set_ticks_position('both')
 axs[0].yaxis.set_ticks_position('both')
 axs[1].yaxis.set_ticks_position('both')
 axs[2].yaxis.set_ticks_position('both')
-bboxx = transforms.Bbox([[0.18, 2.64], [18.22, 26.44]])
+bboxx = transforms.Bbox([[0.18, 2.], [18.22, 26.44]])
 plt.savefig('GD356ThesisLCs.pdf',bbox_inches=bboxx) 
 plt.show()
