@@ -67,5 +67,5 @@ ax.set_xlim(0.0128, 5)
 ax.set_ylim(0.0,0.1)
 
 # crop and save the plot
-bboxx = transforms.Bbox([[0.3, 0.45], [11., 8.95]])
+bboxx = transforms.Bbox([[0.3, 0.3], [11., 8.95]])
 plt.savefig('BDWDSeparation.pdf', bbox_inches=bboxx)
